@@ -6,9 +6,19 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@types/cookie": "^0.5.2",
+    "@types/cookie-parser": "^1.4.4",
+    "@types/jsonwebtoken": "^9.0.3",
+    "@types/passport": "^1.0.13",
+    "cookie": "^0.5.0",
+    "cookie-parser": "^1.4.6",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-session": "^1.17.3",
     "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0",
     "path": "^0.12.7",
     "puppeteer": "^21.3.5"
   },
@@ -16,6 +26,7 @@
     "@types/express": "^4.17.18",
     "@types/express-validator": "^3.0.0",
     "@types/node": "^20.7.2",
+    "@types/passport-google-oauth20": "^2.0.12",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.2.2"
   },

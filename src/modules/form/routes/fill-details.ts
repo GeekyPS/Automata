@@ -6,6 +6,8 @@ import { delay } from "../utils/delay";
 import { validateRequest } from "../../../middlewares/validate-request";
 import { deleteFiles } from "../../../utils/delete-files";
 import { getImageUrl } from "../utils/attach-url";
+import auth from "../../../middlewares/auth-handler";
+import fs from 'fs'
 const router = express.Router();
 
 const waitForSelectorwithRetry = async ( page : Page  , selector : string , maxRetries: number , delaytime:number ):Promise<void> =>{
@@ -25,7 +27,7 @@ const waitForSelectorwithRetry = async ( page : Page  , selector : string , maxR
 }
 
 router.post(
-  "/api/fill-details",
+  "/api/fill-details", auth,
   [
     body("link")
       .notEmpty()
@@ -47,6 +49,27 @@ router.post(
       await page.setViewport({ width: 1920, height: 1080 });
 
       await delay(100);
+
+      // token contains the userID which which can be searched for in the user-data.json
+      const filename = './static/userData/user-data.json';
+      const userID = res.locals.user;
+      var loggedIn = false;
+      if(userID) loggedIn = true;
+
+      let users:any = {};
+      if(fs.existsSync(filename) && loggedIn){
+        users = JSON.parse(fs.readFileSync(filename, 'utf-8'));
+      }else{
+        if(loggedIn) console.log("ERROR: user-data.json not available");
+        loggedIn = false;
+      }
+      var user;
+      if(loggedIn){
+        user = users[userID.userID];
+        if(user ==  undefined){
+          throw new Error("No entry for user in database, login again");
+        }
+      }
 
       await waitForSelectorwithRetry(page, Constants.divSelector, 3, 100);
       const numElements = await page.evaluate((divSelector: string) => {
@@ -80,7 +103,20 @@ router.post(
 
         if (element) {
           await waitForSelectorwithRetry(page, inputSelector, 3, 100);
-          await page.type(inputSelector, `hello ${titles[x]}`, { delay: 10 });
+          
+          // checking if the field is name or email 
+          var currTitle: string = titles[x];
+          currTitle = currTitle.toLowerCase();
+
+          if(currTitle == 'name' && loggedIn){
+            await page.type(inputSelector, `${user.username}`, { delay: 10 });
+          }
+          else if(currTitle == 'email' && loggedIn){
+            await page.type(inputSelector, `${user.email}`, { delay: 10 });
+          }
+          else{
+            await page.type(inputSelector, `hello ${titles[x]}`, { delay: 10 });
+          }         
         } else {
           inputSelector = Constants.checkBoxSelector.replace(
             "$",
@@ -94,7 +130,7 @@ router.post(
       }
 
       await waitForSelectorwithRetry(page, Constants.submitSelector, 3, 100);
-       await page.click(Constants.submitSelector);
+      await page.click(Constants.submitSelector);
 
       await page.screenshot({
         path: "static/images/finalSubmission.jpg",

@@ -1,5 +1,24 @@
+// function to check if user is logged in (using cookie)
+function getCookie(name) {
+  var nameEQ = name + "=";
+  var ca = document.cookie.split(';');
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+}
 
 document.addEventListener("DOMContentLoaded", function () {
+  // changing the login button text based on whether user is logged in or not
+  const loginButton = document.getElementById("login-btn");
+  const token = getCookie('token');
+  if(token){
+    loginButton.innerText = "Logout";
+  }else{
+    loginButton.innerText = "Login";
+  }
 
   const formUrlInput = document.getElementById("form-url");
   const fillDetailsButton = document.querySelector(".fill-details-btn");
@@ -37,6 +56,15 @@ function showSubmittedFields() {
   });
 }
 
+// login funtion
+function login(event) {
+  event.preventDefault();
+  const token = getCookie('token');
+  if(!token)
+    window.location.replace(`http://localhost:3030/auth/google`);
+  else
+    window.location.replace(`http://localhost:3030/auth/google/logout`);
+}
 
 function fillForm() {
   var loadingOverlay = document.querySelector(".loading-overlay");

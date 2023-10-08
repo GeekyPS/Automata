@@ -3,6 +3,7 @@ node_modules/
 
 # Output files
 dist/
+static/userData
 
 # IDE and editor specific files
 .vscode/
