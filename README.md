@@ -57,6 +57,20 @@ Here's an elaboration on how this system works:
 <pre>npm install</pre>
 
 `Note:` Before starting the server, make sure a `.env` file is made as per the sample provided in .env.sample file
+<br>
+`Note:` Also make sure to set-up google api in [Google API dashboard](https://console.cloud.google.com/apis/dashboard).
+<details>
+<summary>Google API instructions</summary>
+<ul>
+<li> After creating new Project, first fill the details in OAuth Consent screen tab.</li>
+Here set user type to "External" and support email to your email, rest can be empty or default.
+<li>Now head to the credentials tab and create new credentials ot type OAuth API ID</li>
+Make sure to add authorized redirect URL: http://localhost:PORT/auth/google/callback
+<li>Now download the OAuth Client JSON and fill the Client ID and Secret in the .env file as shown in sample.</li>
+Also make a JWT secret (any strong sentence) as show in sample.<br>
+<li>Instructions with images can be found here: https://johnnyreilly.com/google-apis-authentication-with-typescript
+</li>
+</details>
 
 ## 2: Running the Application
 
