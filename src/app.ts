@@ -16,7 +16,7 @@ const app = express();
 
 app.use(CookieParser()) //cookie parser for the middleware, and passport must be initialized
 app.use(passport.initialize());
-app.use(require('express-session')({ // express session is necessary for passport
+app.use(require('express-session')({ // express session is necessary for passport, also note that google client has to be made in developer's page
   secret: process.env.GOOGLE_CLIENT_SECRET,
   resave: true,
   saveUninitialized: true
