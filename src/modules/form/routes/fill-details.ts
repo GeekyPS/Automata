@@ -32,6 +32,23 @@ const waitForSelectorwithRetry = async (
   );
 };
 
+const getFieldSelector =async (page: Page, fieldNumber: number):  Promise<string> => {
+  for(const selector of Constants.iterableSelectors){
+    let tempSelector: string = selector.replace(
+      "$",
+      (fieldNumber + 1).toString()
+    );
+
+    const element = await page.$(tempSelector);
+    await delay(100);
+
+    if(element){
+      return tempSelector;
+    }
+  }
+  return "None";
+}
+
 router.post(
   "/api/fill-details",
   [
@@ -80,33 +97,67 @@ router.post(
       );
 
       for (let x = 0; x < numElements; x++) {
-        let inputSelector: string = Constants.inputSelector.replace(
-          "$",
-          (x + 1).toString()
-        );
+        let fieldSelector: string = await getFieldSelector(page, x);
+        await waitForSelectorwithRetry(page, fieldSelector, 3, 100);
+        switch (fieldSelector) {
+          case Constants.inputSelector.replace(
+            "$",
+            (x + 1).toString()
+          ): 
+            const Text:string = await generateTextWithPalmAPI(titles[x]);
+           await page.type(fieldSelector, Text, { delay: Text.length*0.2 });
+          break;
 
-        const element = await page.$(inputSelector);
-        await delay(100);
+          case Constants.checkBoxSelector.replace(
+            "$",
+            (x + 1).toString()
+          ): await page.click(fieldSelector);
+          break;
 
-        if (element) {
-          await waitForSelectorwithRetry(page, inputSelector, 3, 100);
-          const Text:string = await generateTextWithPalmAPI(titles[x]);
-          await page.type(inputSelector, Text, { delay: Text.length*0.2 });
-        } else {
-          inputSelector = Constants.checkBoxSelector.replace(
+          case Constants.multiChoiceSelector.replace(
+            "$",
+            (x + 1).toString()
+          ): await page.click(fieldSelector);
+          break;
+
+          case Constants.textAreaSelector.replace(
+            "$",
+            (x + 1).toString()
+          ):
+            const Text:string = await generateTextWithPalmAPI(titles[x]);
+           await page.type(fieldSelector, Text, { delay: Text.length*0.2 });
+          break;
+
+          case Constants.dropdownSelector.replace(
+            "$",
+            (x + 1).toString()
+          ):
+          await page.click(fieldSelector);
+          await page.waitForTimeout(500);
+          let optionSelector: string = Constants.dropdownOptionSelector.replace(
             "$",
             (x + 1).toString()
           );
-          await waitForSelectorwithRetry(page, inputSelector, 3, 100);
-          await page.click(inputSelector);
+          await page.click(optionSelector);
+          break;
+
+          case Constants.linearScaleSelector.replace(
+            "$",
+            (x + 1).toString()
+          ): await page.click(fieldSelector);
+          break;
+
+          default:
+            break;
         }
       }
+      
+      await page.waitForTimeout(500);
+      await waitForSelectorwithRetry(page, Constants.submitSelector, 3, 100);
       await page.screenshot({
         path: "static/images/finalSubmission.jpg",
         fullPage: true
       });
-      await waitForSelectorwithRetry(page, Constants.submitSelector, 3, 100);
-      
       await page.click(Constants.submitSelector);
       
       await page.waitForNavigation({ waitUntil: 'networkidle0' });
