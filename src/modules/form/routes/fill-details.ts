@@ -7,6 +7,8 @@ import { validateRequest } from "../../../middlewares/validate-request";
 import { deleteFiles } from "../../../utils/delete-files";
 import { getImageUrl } from "../utils/attach-url";
 import { NotFoundError } from "../../../utils/errors/not-found-error";
+import { generateKey } from "crypto";
+import {generateTextWithPalmAPI} from "../utils/generate-text";
 const router = express.Router();
 
 const waitForSelectorwithRetry = async (
@@ -101,7 +103,9 @@ router.post(
           case Constants.inputSelector.replace(
             "$",
             (x + 1).toString()
-          ): await page.type(fieldSelector, `hello ${titles[x]}`, { delay: 100 });
+          ): 
+            const Text:string = await generateTextWithPalmAPI(titles[x]);
+           await page.type(fieldSelector, Text, { delay: Text.length*0.2 });
           break;
 
           case Constants.checkBoxSelector.replace(
@@ -119,7 +123,9 @@ router.post(
           case Constants.textAreaSelector.replace(
             "$",
             (x + 1).toString()
-          ): await page.type(fieldSelector, `hello ${titles[x]}`, { delay: 100 });
+          ):
+            const Text:string = await generateTextWithPalmAPI(titles[x]);
+           await page.type(fieldSelector, Text, { delay: Text.length*0.2 });
           break;
 
           case Constants.dropdownSelector.replace(
